@@ -1,22 +1,21 @@
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize('vehical-data', 'rajan', 'Rajan@060399', {
-  host: 'localhost',
-  dialect: 'mysql' // or any other SQL dialect
-});
+const sequelize = require('../database');
+const cars = require('./Car');
+const bikes = require('./Bike');
+const users = require('./User');
+const bookings = require('./Booking');
 
-const db = {};
+cars.hasMany(bookings);
+bikes.hasMany(bookings);
+users.hasMany(bookings);
+bookings.belongsTo(users);
 
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
+module.exports = {
+  sequelize,
+  cars,
+  bikes,
+  users,
+  bookings
+};
 
-db.CarType = require('./CarType')(sequelize, Sequelize);
-db.Vehicle = require('./Vehicle')(sequelize, Sequelize);
-db.Booking = require('./Booking')(sequelize, Sequelize);
 
-// Associations
-db.CarType.hasMany(db.Vehicle);
-db.Vehicle.belongsTo(db.CarType);
-db.Vehicle.hasMany(db.Booking);
-db.Booking.belongsTo(db.Vehicle);
 
-module.exports = db;
