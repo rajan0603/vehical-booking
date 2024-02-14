@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography, Stack } from '@mui/material';
 import './App.css'
 import { Box } from "@mui/system";
@@ -12,6 +12,57 @@ function Form() {
   const [model, setModel] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [isNextDisabled, setIsNextDisabled] = useState(true);
+  const [vehicleTypes, setVehicleTypes] = useState([]);
+  const [vehicleModels, setVehicleModels] = useState([]);
+
+  // Enable/disable Next button based on form validation
+  useEffect(() => {
+    setIsNextDisabled(true);
+    if (step === 1 && firstName && lastName) {
+      setIsNextDisabled(false);
+    } else if (step === 2 && wheels) {
+      setIsNextDisabled(false);
+    } else if (step === 3 && type) {
+      setIsNextDisabled(false);
+    } else if (step === 4 && model) {
+      setIsNextDisabled(false);
+    }
+  }, [step, firstName, lastName, wheels, type, model]);
+
+  // Fetch vehicle types based on number of wheels
+  useEffect(() => {
+    if (wheels) {
+      let type;
+      if(wheels === '2'){
+        type = 'bike';
+      }
+      else{
+        type = 'car';
+      }
+      fetch(`http://localhost:5000/api/vehicles/types/${type}`)
+        .then(response => response.json())
+        .then(data => setVehicleTypes(data))
+        .catch(error => console.error('Error fetching vehicle types:', error));
+    }
+  }, [wheels]);
+
+  // Fetch vehicle models based on selected type
+  useEffect(() => {
+    let vehicleType;
+    if(wheels === '2'){
+      vehicleType = 'bike';
+    }
+    else{
+      vehicleType = 'car';
+    }
+    if (type) {
+      fetch(`http://localhost:5000/api/vehicles/models/${vehicleType}/${type}`)
+        .then(response => response.json())
+        .then(data => setVehicleModels(data))
+        .catch(error => console.error('Error fetching vehicle models:', error));
+    }
+  }, [type]);
 
   const handleNext = () => {
     setStep(step + 1);
@@ -22,9 +73,21 @@ function Form() {
   };
 
   const handleSubmit = () => {
-    // Submit form data to the backend
-    console.log('Form submitted:', { firstName, lastName, wheels, type, model, startDate, endDate });
+    const formData = { firstName, lastName, wheels, type, model, startDate, endDate };
+    fetch('http://localhost:5000/api/vehicle/book', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Form submitted successfully:', data);
+    })
+    .catch(error => console.error('Error submitting form:', error));
   };
+
 
   const renderStep = () => {
     switch (step) {
@@ -41,6 +104,7 @@ function Form() {
               name="firstame"
               placeholder="Enter firstName"
               fullWidth
+              value={firstName}
               onChange = {(e) => setFirstName(e.target.value)}
               required
             />
@@ -51,19 +115,16 @@ function Form() {
               name="lastName"
               type="lastName"
               fullWidth
+              value={lastName}
               onChange = {(e) => setLastName(e.target.value)}
               required
             />
-            {/* <Button className="button" variant="contained" onClick={handleNext}>
-              Next
-            </Button> */}
           </Stack>
         </Box>
         );
       case 2:
         return (
           <FormControl component="fieldset">
-            {/* <FormLabel component="legend">Number of Wheels</FormLabel> */}
             <h2>Number of wheels</h2>
             <RadioGroup aria-label="wheels" name="wheels" value={wheels} onChange={(e) => setWheels(e.target.value)}>
               <FormControlLabel value="2" control={<Radio />} label="2" />
@@ -72,11 +133,8 @@ function Form() {
           </FormControl>
         );
       case 3:
-        // Fetch vehicle types based on number of wheels from API
-        const vehicleTypes = wheels === '2' ? ['bike1', 'bike2'] : ['car1', 'car2']; // Sample data
         return (
           <FormControl component="fieldset">
-            {/* <FormLabel component="legend">Type of Vehicle</FormLabel> */}
             <h2>Type of Vehicle</h2>
             <RadioGroup aria-label="type" name="type" value={type} onChange={(e) => setType(e.target.value)}>
               {vehicleTypes.map((vehicleType, index) => (
@@ -86,11 +144,8 @@ function Form() {
           </FormControl>
         );
       case 4:
-        // Fetch vehicle models based on selected type from API
-        const vehicleModels = type === 'bike1' ? ['model1', 'model2'] : ['model3', 'model4']; // Sample data
         return (
           <FormControl component="fieldset">
-            {/* <FormLabel component="legend">Specific Model</FormLabel> */}
             <h2>Specific Model</h2>
             <RadioGroup aria-label="model" name="model" value={model} onChange={(e) => setModel(e.target.value)}>
               {vehicleModels.map((vehicleModel, index) => (
@@ -102,7 +157,6 @@ function Form() {
       case 5:
         return (
           <div>
-            {/* <Typography variant="h6">Date Range Picker</Typography> */}
             <h2>Date Range Picker</h2>
             {/* Implement date range picker component */}
           </div>
@@ -124,21 +178,21 @@ function Form() {
             </Button>
           )}
           {step !== 5 && (
-            <Button variant="contained" onClick={handleNext} style={{ marginLeft: '10px' }}>
+            <Button variant="contained" onClick={handleNext} disabled={isNextDisabled} style={{ marginLeft: '10px' }}>
               Next
             </Button>
           )}
           {step === 5 && (
-            <Button variant="contained" onClick={handleSubmit} style={{ marginLeft: '10px' }}>
+            <Button variant="contained" onClick={handleSubmit} disabled={isNextDisabled} style={{ marginLeft: '10px' }}>
               Submit
             </Button>
           )}
         </div>
       </div>
     </div>
-    
   );
 }
 
 export default Form;
+
 

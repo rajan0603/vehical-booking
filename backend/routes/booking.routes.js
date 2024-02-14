@@ -50,6 +50,26 @@ router.post('/book', async (req, res) => {
   }
 });
 
+router.get('/types/:vehicleType', async (req, res) => {
+  const { vehicleType } = req.params;
+
+  try {
+    let types;
+    if (vehicleType === 'car') {
+      types = await Car.findAll({ attributes: ['type'], group: ['type'] });
+    } else if (vehicleType === 'bike') {
+      types = await Bike.findAll({ attributes: ['type'], group: ['type'] });
+    } else {
+      throw new Error('Invalid vehicle type');
+    }
+
+    res.status(200).json(types.map(type => type.type));
+  } catch (error) {
+    console.error('Error fetching vehicle types:', error);
+    res.status(500).json({ error: 'Failed to fetch vehicle types' });
+  }
+});
+
 router.get('/models/:vehicleType/:type', async (req, res) => {
   const { vehicleType, type } = req.params;
 
