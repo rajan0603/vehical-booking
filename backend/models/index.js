@@ -1,20 +1,20 @@
 const sequelize = require('../database');
-const cars = require('./Car');
-const bikes = require('./Bike');
-const users = require('./User');
-const bookings = require('./Booking');
+const Car = require('./Car');
+const Bike = require('./Bike');
+// const User = require('./User');
+const Booking = require('./Booking');
 
-cars.hasMany(bookings);
-bikes.hasMany(bookings);
-users.hasMany(bookings);
-bookings.belongsTo(users);
+// Define associations
+Car.hasMany(Booking);
+Bike.hasMany(Booking);
+Booking.belongsTo(Car);
+Booking.belongsTo(Bike);
 
 module.exports = {
   sequelize,
-  cars,
-  bikes,
-  users,
-  bookings
+  Car,
+  Bike,
+  Booking
 };
 
 

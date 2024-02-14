@@ -2,17 +2,21 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 
 const Bike = sequelize.define('Bike', {
+  vehicleType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   model: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  type: {
-    type: DataTypes.ENUM('cruiser', 'sports'),
+  availability: {
+    type: DataTypes.BOOLEAN,
     allowNull: false
   },
-  numberOfWheels: {
-    type: DataTypes.INTEGER,
-    defaultValue: 2
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false
   }
 });
 

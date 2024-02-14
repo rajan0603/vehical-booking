@@ -2,9 +2,29 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 const Car = require('./Car');
 const Bike = require('./Bike');
-const User = require('./User');
+// const User = require('./User');
 
 const Booking = sequelize.define('Booking', {
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  numOfWheels: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  vehicleType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  model: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   startDate: {
     type: DataTypes.DATE,
     allowNull: false
@@ -15,9 +35,7 @@ const Booking = sequelize.define('Booking', {
   }
 });
 
-Booking.belongsTo(User);
-Booking.belongsTo(Car);
-Booking.belongsTo(Bike);
+
 
 module.exports = Booking;
 
